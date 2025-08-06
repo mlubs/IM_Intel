@@ -72,6 +72,26 @@ function parseBrazilianNumber(value) {
     return 0;
 }
 
+function updateDateFilters() {
+    if (!globalData || globalData.length === 0) return;
+    const dates = globalData.map(d => d.Data).filter(d => d instanceof Date && !isNaN(d));
+    if (dates.length === 0) return;
+
+    const minDate = new Date(Math.min.apply(null, dates));
+    const maxDate = new Date(Math.max.apply(null, dates));
+
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (startDateInput) {
+        startDateInput.value = minDate.toLocaleDateString('pt-BR');
+    }
+    if (endDateInput) {
+        endDateInput.value = maxDate.toLocaleDateString('pt-BR');
+    }
+}
+
+
 // Função para atualizar dados após o carregamento
 function afterDataLoaded(data) {
     globalData = processData(data);
