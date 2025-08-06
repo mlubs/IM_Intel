@@ -399,3 +399,338 @@ function createAllCharts() {
             ticks: { color: chartColors.violet }
         },
         y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: { display: true, text: 'USD ($)', color: chartColors.brown },
+            ticks: { color: chartColors.brown },
+            grid: { drawOnChartArea: false }
+        }
+    });
+
+    // Frete Exportação
+    createLineChart('freteExportChart', [
+        {
+            label: 'CNT GQ USD ($)',
+            data: filteredData.map(d => d.CNT_GQ_USD),
+            borderColor: chartColors.olive,
+            backgroundColor: chartColors.olive + '30',
+            tension: 0.1
+        },
+        {
+            label: 'CNT CG USD ($)',
+            data: filteredData.map(d => d.CNT_CG_USD),
+            borderColor: chartColors.brown,
+            backgroundColor: chartColors.brown + '30',
+            tension: 0.1
+        },
+        {
+            label: 'CNT VC USD ($)',
+            data: filteredData.map(d => d.CNT_VC_USD),
+            borderColor: chartColors.terracotta,
+            backgroundColor: chartColors.terracotta + '30',
+            tension: 0.1
+        }
+    ]);
+}
+
+function updateKPIBoxes() {
+    if (filteredData.length === 0) return;
+    const latest = filteredData[filteredData.length - 1];
+    const latestDate = formatDateBR(latest.Data);
+    console.log('Atualizando KPIs - TIO2_EUR valor:', latest.TIO2_EUR);
+
+    const priceTitle = document.getElementById('priceTitle');
+    if (priceTitle) {
+        priceTitle.textContent = `Preços - Última atualização: ${latestDate}`;
+    }
+
+    const kpiMappings = {
+        'celulose-eur': [latest.Celulose_EUR, '€'],
+        'celulose-usd': [latest.Celulose_USD, '$'],
+        'tio2-eur': [latest.TIO2_EUR, '€'],
+        'resina-uf': [latest.Resina_UF_BRL, 'R$'],
+        'resina-mf': [latest.Resina_MF_BRL, 'R$'],
+        'cnt-eu': [latest.CNT_EU_EUR, '€'],
+        'cnt-cn': [latest.CNT_CN_USD, '$'],
+        'cnt-gq': [latest.CNT_GQ_USD, '$'],
+        'cnt-cg': [latest.CNT_CG_USD, '$'],
+        'cnt-vc': [latest.CNT_VC_USD, '$']
+    };
+
+    Object.entries(kpiMappings).forEach(([id, [value, currency]]) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = formatCurrency(value, currency);
+            if (id === 'tio2-eur') {
+                console.log(`KPI TIO2_EUR atualizado - Valor bruto: ${value}, Formatado: ${element.textContent}`);
+            }
+        }
+    });
+}
+
+function updateDateFilters() {
+    if (globalData.length === 0) return;
+    const dates = globalData.map(d => d.Data).filter(d => d instanceof Date);
+    if (dates.length === 0) return;
+
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date(Math.max(...dates));
+
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (startDateInput) startDateInput.value = formatDateBR(minDate);
+    if (endDateInput) endDateInput.value = formatDateBR(maxDate);
+}
+
+function showUploadStatus(message, type) {
+    const statusEl = document.getElementById('uploadStatus');
+    if (statusEl) {
+        statusEl.textContent = message;
+        statusEl.className = `upload-status ${type}`;
+        statusEl.classList.remove('hidden');
+        if (type === 'success') {
+            setTimeout(() => statusEl.classList.add('hidden'), 3000);
+        }
+    }
+}
+
+function updateLastUploadInfo() {
+    const infoEl = document.getElementById('lastUploadInfo');
+    if (infoEl) {
+        const now = new Date();
+        infoEl.textContent = `Último upload: ${formatDateBR(now)} às ${now.toLocaleTimeString('pt-BR')}`;
+    }
+}
+
+function updateDashboard() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    let startDate = null;
+    let endDate = null;
+
+    if (startDateInput && startDateInput.value) {
+        startDate = parseDateBR(startDateInput.value);
+        if (!startDate) {
+            showUploadStatus('Data de início inválida. Use o formato dd/mm/aaaa', 'error');
+            return;
+        }
+    }
+
+    if (endDateInput && endDateInput.value) {
+        endDate = parseDateBR(endDateInput.value);
+        if (!endDate) {
+            showUploadStatus('Data de fim inválida. Use o formato dd/mm/aaaa', 'error');
+            return;
+        }
+        endDate.setHours(23, 59, 59, 999);
+    }
+
+    filteredData = filterDataByDate(globalData, startDate, endDate);
+    console.log('Dashboard atualizado - registros filtrados:', filteredData.length);
+
+    updateKPIBoxes();
+
+    setTimeout(() => {
+        createAllCharts();
+    }, 100);
+}
+
+function handleFileUpload(file) {
+    if (!file) {
+        console.error('No file provided');
+        return;
+    }
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        showUploadStatus('Formato de arquivo inválido. Use .xlsx ou .xls', 'error');
+        return;
+    }
+    showUploadStatus('Processando arquivo...', 'processing');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+                showUploadStatus('Arquivo vazio ou sem dados válidos', 'error');
+                return;
+            }
+
+            console.log('Dados brutos carregados:', jsonData.length, 'registros');
+            console.log('Primeiro registro:', jsonData[0]);
+
+            const processedData = processData(jsonData);
+
+            if (processedData.length === 0) {
+                showUploadStatus('Nenhum dado válido encontrado no arquivo', 'error');
+                return;
+            }
+
+            globalData = processedData;
+            updateLastUploadInfo();
+            updateDateFilters();
+            updateDashboard();
+
+            showUploadStatus(`Arquivo processado com sucesso! ${processedData.length} registros carregados.`, 'success');
+        } catch (error) {
+            console.error('Error processing file:', error);
+            showUploadStatus(`Erro ao processar arquivo: ${error.message}`, 'error');
+        }
+    };
+    reader.onerror = function() {
+        showUploadStatus('Erro ao ler arquivo', 'error');
+    };
+
+    reader.readAsArrayBuffer(file);
+}
+
+function fetchAndLoadExcel(url) {
+    showUploadStatus('Carregando arquivo database automaticamente...', 'processing');
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar arquivo: ${response.statusText}`);
+            }
+            return response.arrayBuffer();
+        })
+        .then(data => {
+            const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            if (jsonData.length === 0) {
+                showUploadStatus('Arquivo database vazio ou sem dados válidos', 'error');
+                return;
+            }
+
+            globalData = processData(jsonData);
+            updateLastUploadInfo();
+            updateDateFilters();
+            updateDashboard();
+
+            showUploadStatus(`Arquivo database carregado com sucesso! ${globalData.length} registros.`, 'success');
+        })
+        .catch(error => {
+            console.error('Falha ao carregar database.xlsx:', error);
+            showUploadStatus('Falha ao carregar arquivo database automaticamente. Use o upload manual.', 'error');
+        });
+}
+
+function initializeApp() {
+    console.log('Inicializando app...');
+    if (typeof XLSX === 'undefined') {
+        showUploadStatus('Erro: Biblioteca XLSX não carregada', 'error');
+        console.error('XLSX library not loaded');
+        return;
+    }
+    if (typeof Chart === 'undefined') {
+        showUploadStatus('Erro: Biblioteca Chart.js não carregada', 'error');
+        console.error('Chart.js library not loaded');
+        return;
+    }
+    // Inicia com dados de exemplo
+    console.log('Carregando dados de exemplo...');
+    globalData = processData(sampleData);
+    updateDateFilters();
+    updateDashboard();
+
+    // Tenta carregar arquivo database.xlsx automaticamente
+    fetchAndLoadExcel('database.xlsx');
+}
+
+function setupEventListeners() {
+    console.log('Configurando event listeners...');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+
+    if (uploadBtn && fileInput) {
+        uploadBtn.onclick = e => {
+            e.preventDefault();
+            fileInput.click();
+        };
+
+        fileInput.onchange = e => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+                e.target.value = '';
+            }
+        };
+    }
+
+    if (uploadZone && fileInput) {
+        uploadZone.onclick = e => {
+            e.preventDefault();
+            fileInput.click();
+        };
+
+        uploadZone.ondragover = e => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        };
+        uploadZone.ondragleave = e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+        };
+        uploadZone.ondrop = e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        };
+    }
+
+    document.ondragover = e => e.preventDefault();
+    document.ondrop = e => e.preventDefault();
+
+    function setupDateInputHandlers(input) {
+        if (!input) return;
+        input.oninput = e => {
+            if (!validateDateInput(e.target.value)) {
+                e.target.style.borderColor = '#c0152f';
+            } else {
+                e.target.style.borderColor = '';
+            }
+        };
+        input.onblur = e => {
+            const date = parseDateBR(e.target.value);
+            if (date) {
+                e.target.value = formatDateBR(date);
+                e.target.style.borderColor = '';
+                updateDashboard();
+            } else {
+                e.target.style.borderColor = '#c0152f';
+            }
+        };
+        input.onkeypress = e => {
+            if (e.key === 'Enter') e.target.blur();
+        };
+    }
+
+    setupDateInputHandlers(startDateInput);
+    setupDateInputHandlers(endDateInput);
+
+    console.log('Event listeners configurados.');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeApp();
+        setupEventListeners();
+    });
+} else {
+    initializeApp();
+    setupEventListeners();
+}
