@@ -62,7 +62,7 @@ const chartColors = {
 
 // --- Funções auxiliares ---
 
-function parseBrazilianNumber(value) {
+function BrazilianNumber(value) {
     if (typeof value === 'number') return value;
     if (typeof value === 'string') {
         const clean = value.replace(/\./g, '').replace(',', '.');
@@ -75,6 +75,7 @@ function parseBrazilianNumber(value) {
 function parseLocalDate(dateStr) {
     if (!dateStr) return null;
 
+    // Tratamento para string formato brasileiro dd/mm/aaaa
     if (typeof dateStr === 'string' && dateStr.includes('/')) {
         const parts = dateStr.split('/');
         if (parts.length === 3) {
@@ -82,17 +83,27 @@ function parseLocalDate(dateStr) {
             const month = parseInt(parts[1], 10);
             const year = parseInt(parts[2], 10);
             if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900) {
+                // Cria data local, hora zero
                 return new Date(year, month - 1, day);
             }
         }
+        return null;
     }
 
-    if (typeof dateStr === 'number') { // Excel serial date
-        return new Date((dateStr - 25569) * 86400 * 1000);
+    // Tratamento para número serial Excel
+    if (typeof dateStr === 'number') {
+        // Converte número serial Excel para data UTC
+        const utc_days = Math.floor(dateStr - 25569);
+        const utc_seconds = utc_days * 86400;
+        const date = new Date(utc_seconds * 1000);
+
+        // Retorna data local (sem offset timezone)
+        return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     }
 
+    // Para strings em outros formatos reconhecidos
     const date = new Date(dateStr);
-    return isNaN(date.getTime()) ? null : date;
+    return isNaN(date.getTime()) ? null : new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function formatDateBR(date) {
