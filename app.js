@@ -730,34 +730,59 @@ function handleFileUpload(file) {
 
 // Initialize app
 function initializeApp() {
-    console.log('Initializing app...');
-    
-    // Check for required libraries
-    if (typeof XLSX === 'undefined') {
-        console.error('XLSX library not loaded');
-        showUploadStatus('Erro: Biblioteca XLSX não carregada', 'error');
-        return;
-    }
-    
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js library not loaded');
-        return;
-    }
-    
-    // Initialize with sample data
-    console.log('Carregando dados de exemplo...');
-    globalData = processData(sampleData);
-    
-    // Update UI
-    updateDateFilters();
-    updateDashboard();
-    
-    console.log('App initialized successfully with', globalData.length, 'sample records');
+  console.log('Initializing app...');
+  if (typeof XLSX === 'undefined') {
+    console.error('XLSX library not loaded');
+    showUploadStatus('Erro: Biblioteca XLSX não carregada', 'error');
+    return;
+  }
+  if (typeof Chart === 'undefined') {
+    console.error('Chart.js library not loaded');
+    return;
+  }
+
+  // Tente carregar automaticamente o arquivo database.xlsx na raiz
+  fetchAndLoadExcel('./database.xlsx');
 }
 
 // Robust event listeners setup
 function setupEventListeners() {
     console.log('Setting up event listeners...');
+
+// Carregar xlsx auto    
+function fetchAndLoadExcel(url) {
+  showUploadStatus('Carregando arquivo database automaticamente...', 'processing');
+
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Erro ao carregar arquivo: ${response.statusText}`);
+      }
+      return response.arrayBuffer();
+    })
+    .then(data => {
+      const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      if (jsonData.length === 0) {
+        showUploadStatus('Arquivo database vazio ou sem dados válidos', 'error');
+        return;
+      }
+      console.log('Dados do database carregados:', jsonData.length);
+      globalData = processData(jsonData);
+      updateLastUploadInfo();
+      updateDateFilters();
+      updateDashboard();
+      showUploadStatus(`Arquivo database carregado com sucesso! ${globalData.length} registros.`, 'success');
+    })
+    .catch(error => {
+      console.error(error);
+      showUploadStatus('Falha ao carregar arquivo database automaticamente.', 'error');
+      // Aqui fica possível habilitar upload manual se desejar
+    });
+}
+
     
     // Function to set up all event listeners
     function attachEventListeners() {
