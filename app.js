@@ -45,7 +45,7 @@ const sampleData = [
         CNT_CG_USD: "3.265,80",
         CNT_VC_USD: "4.790,50"
     },
-    // ... Mais entradas conforme o seu sampleData original
+    // ... outras entradas ...
 ];
 
 // NYRIA 2025 colors
@@ -62,9 +62,10 @@ const chartColors = {
 
 // --- Funções auxiliares ---
 
-function BrazilianNumber(value) {
+function parseBrazilianNumber(value) {
     if (typeof value === 'number') return value;
     if (typeof value === 'string') {
+        // Remove pontos (milhares) e troca vírgula por ponto decimal
         const clean = value.replace(/\./g, '').replace(',', '.');
         const parsed = parseFloat(clean);
         return isNaN(parsed) ? 0 : parsed;
@@ -83,7 +84,6 @@ function parseLocalDate(dateStr) {
             const month = parseInt(parts[1], 10);
             const year = parseInt(parts[2], 10);
             if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900) {
-                // Cria data local, hora zero
                 return new Date(year, month - 1, day);
             }
         }
@@ -92,16 +92,13 @@ function parseLocalDate(dateStr) {
 
     // Tratamento para número serial Excel
     if (typeof dateStr === 'number') {
-        // Converte número serial Excel para data UTC
         const utc_days = Math.floor(dateStr - 25569);
         const utc_seconds = utc_days * 86400;
         const date = new Date(utc_seconds * 1000);
-
-        // Retorna data local (sem offset timezone)
         return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     }
 
-    // Para strings em outros formatos reconhecidos
+    // Para strings em outros formatos
     const date = new Date(dateStr);
     return isNaN(date.getTime()) ? null : new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -181,9 +178,7 @@ function createLineChart(canvasId, datasets, scales = null) {
     if (charts[canvasId]) {
         charts[canvasId].destroy();
     }
-    const defaultScales = {
-        y: { title: { display: true, text: 'Valor' } }
-    };
+    const defaultScales = { y: { title: { display: true, text: 'Valor' } } };
     const config = {
         type: 'line',
         data: { labels, datasets },
@@ -196,8 +191,7 @@ function createLineChart(canvasId, datasets, scales = null) {
                     callbacks: {
                         title: ctx => {
                             const index = ctx[0].dataIndex;
-                            const date = filteredData[index].Data;
-                            return formatDateBR(date);
+                            return formatDateBR(filteredData[index].Data);
                         }
                     }
                 }
@@ -210,10 +204,8 @@ function createLineChart(canvasId, datasets, scales = null) {
 
 function createAllCharts() {
     if (filteredData.length === 0) return;
-
     console.log('Criando gráficos com', filteredData.length, 'registros');
 
-    // Celulose (dual axis)
     createLineChart('celuloseChart', [
         {
             label: 'Celulose EUR (€)',
@@ -249,9 +241,7 @@ function createAllCharts() {
         }
     });
 
-    // TIO2_EUR
     const tio2Data = filteredData.map(d => d.TIO2_EUR);
-    console.log('Dados TIO2_EUR para gráfico:', tio2Data);
     createLineChart('tio2Chart', [{
         label: 'TIO2 EUR (€)',
         data: tio2Data,
@@ -260,7 +250,6 @@ function createAllCharts() {
         tension: 0.1
     }]);
 
-    // Insumos
     createLineChart('insumosChart', [
         {
             label: 'Melamina USD ($)',
@@ -285,7 +274,6 @@ function createAllCharts() {
         }
     ]);
 
-    // Resinas
     createLineChart('resinasChart', [
         {
             label: 'Resina UF BRL (R$)',
@@ -330,7 +318,6 @@ function createAllCharts() {
         }
     });
 
-    // Moedas
     createLineChart('moedasChart', [
         {
             label: 'USDBRL',
@@ -383,7 +370,6 @@ function createAllCharts() {
         }
     });
 
-    // Frete Importação
     createLineChart('freteImportChart', [
         {
             label: 'CNT Europa EUR (€)',
@@ -419,7 +405,6 @@ function createAllCharts() {
         }
     });
 
-    // Frete Exportação
     createLineChart('freteExportChart', [
         {
             label: 'CNT GQ USD ($)',
@@ -671,7 +656,6 @@ function setupEventListeners() {
             e.preventDefault();
             fileInput.click();
         };
-
         fileInput.onchange = e => {
             if (e.target.files.length > 0) {
                 handleFileUpload(e.target.files[0]);
@@ -685,7 +669,6 @@ function setupEventListeners() {
             e.preventDefault();
             fileInput.click();
         };
-
         uploadZone.ondragover = e => {
             e.preventDefault();
             uploadZone.classList.add('dragover');
