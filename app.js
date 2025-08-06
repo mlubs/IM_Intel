@@ -90,7 +90,39 @@ function updateDateFilters() {
         endDateInput.value = maxDate.toLocaleDateString('pt-BR');
     }
 }
-
+function updateDashboard() {
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    
+    let startDate = null;
+    let endDate = null;
+    
+    if (startDateInput && startDateInput.value) {
+        startDate = parseDateBR(startDateInput.value);
+        if (!startDate) {
+            showUploadStatus('Data de início inválida. Use o formato dd/mm/aaaa', 'error');
+            return;
+        }
+    }
+    
+    if (endDateInput && endDateInput.value) {
+        endDate = parseDateBR(endDateInput.value);
+        if (!endDate) {
+            showUploadStatus('Data de fim inválida. Use o formato dd/mm/aaaa', 'error');
+            return;
+        }
+        endDate.setHours(23, 59, 59, 999);
+    }
+ filteredData = filterDataByDate(globalData, startDate, endDate);
+    
+    console.log('Dashboard atualizado - registros filtrados:', filteredData.length);
+    
+    updateKPIBoxes();
+    
+    setTimeout(() => {
+        createAllCharts();
+    }, 100);
+}
 
 // Função para atualizar dados após o carregamento
 function afterDataLoaded(data) {
