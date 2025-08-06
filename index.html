@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Painel de Inteligência de Compras - Impress Decor</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="im.ico" type="image/x-icon">
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <!-- XLSX.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="im.ico" type="image/x-icon" />
+
+    <!-- Bibliotecas de terceiros -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+    <!-- Seu script principal -->
+    <script src="app.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
+        <!-- Cabeçalho -->
         <header class="header">
             <div class="header-content">
                 <h1>Painel de Inteligência de Compras - Impress Decor</h1>
                 <div class="logo-container">
-                    <img src="impress_logo.jpg" 
-                         alt="Impress Decor Logo" 
-                         class="company-logo"
-                         onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTIwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iNjAiIGZpbGw9IiNCMzRBM0EiIHJ4PSI4Ii8+PHRleHQgeD0iNjAiIHk9IjI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+SW1wcmVzczwvdGV4dD48dGV4dCB4PSI2MCIgeT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiPkRlY29yPC90ZXh0Pjwvc3ZnPg=='" />
+                    <img
+                        src="impress_logo.jpg"
+                        alt="Impress Decor Logo"
+                        class="company-logo"
+                        onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTIwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iNjAiIGZpbGw9IiNCMzRBM0EiIHJ4PSI4Ii8+PHRleHQgeD0iNjAiIHk9IjI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCI+SW1wcmVzczwvdGV4dD48dGV4dCB4PSI2MCIgeT0iNDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTAiPkRlY29yPC90ZXh0Pjwvc3ZnPg=='"
+                    />
                 </div>
             </div>
         </header>
@@ -31,17 +36,36 @@
             <div class="date-filters">
                 <div class="filter-group">
                     <label for="startDate" class="form-label">Data Início:</label>
-                    <input type="text" id="startDate" class="form-control date-input" placeholder="01/01/2025" />
+                    <input
+                        type="text"
+                        id="startDate"
+                        class="form-control date-input"
+                        placeholder="01/01/2025"
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
                 </div>
                 <div class="filter-group">
                     <label for="endDate" class="form-label">Data Fim:</label>
-                    <input type="text" id="endDate" class="form-control date-input" placeholder="31/12/2025" />
+                    <input
+                        type="text"
+                        id="endDate"
+                        class="form-control date-input"
+                        placeholder="31/12/2025"
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
                 </div>
             </div>
-            
+
             <div class="upload-section">
                 <div class="upload-controls">
-                    <button id="uploadBtn" class="upload-btn" type="button" title="Clique para selecionar arquivo Excel">
+                    <button
+                        id="uploadBtn"
+                        class="upload-btn"
+                        type="button"
+                        title="Clique para selecionar arquivo Excel"
+                    >
                         <span class="upload-icon">📁</span>
                         <span class="upload-text">Upload Excel</span>
                     </button>
@@ -50,7 +74,7 @@
                     </div>
                 </div>
                 <div id="lastUploadInfo" class="upload-info">Último upload: Dados de exemplo</div>
-                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;" />
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none" />
             </div>
         </section>
 
@@ -65,40 +89,60 @@
                 <div class="kpi-box">
                     <div class="kpi-header"><h3>Celulose</h3></div>
                     <div class="kpi-values">
-                        <div class="kpi-item"><span class="currency"></span><span class="value" id="celulose-eur">--</span></div>
-                        <div class="kpi-item"><span class="currency"></span><span class="value" id="celulose-usd">--</span></div>
+                        <div class="kpi-item">
+                            <span class="currency"></span><span class="value" id="celulose-eur">--</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="currency"></span><span class="value" id="celulose-usd">--</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="kpi-box">
                     <div class="kpi-header"><h3>Dióxido de Titânio</h3></div>
                     <div class="kpi-values">
-                        <div class="kpi-item"><span class="currency"></span><span class="value" id="tio2-eur">--</span></div>
+                        <div class="kpi-item">
+                            <span class="currency"></span><span class="value" id="tio2-eur">--</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="kpi-box">
                     <div class="kpi-header"><h3>Resinas</h3></div>
                     <div class="kpi-values">
-                        <div class="kpi-item"><span class="currency">UF</span><span class="value" id="resina-uf">--</span></div>
-                        <div class="kpi-item"><span class="currency">MF</span><span class="value" id="resina-mf">--</span></div>
+                        <div class="kpi-item">
+                            <span class="currency">UF</span><span class="value" id="resina-uf">--</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="currency">MF</span><span class="value" id="resina-mf">--</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="kpi-box">
                     <div class="kpi-header"><h3>Frete Importação</h3></div>
                     <div class="kpi-values">
-                        <div class="kpi-item"><span class="currency">Europa</span><span class="value" id="cnt-eu">--</span></div>
-                        <div class="kpi-item"><span class="currency">China</span><span class="value" id="cnt-cn">--</span></div>
+                        <div class="kpi-item">
+                            <span class="currency">Europa</span><span class="value" id="cnt-eu">--</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="currency">China</span><span class="value" id="cnt-cn">--</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="kpi-box">
                     <div class="kpi-header"><h3>Frete Exportação</h3></div>
                     <div class="kpi-values">
-                        <div class="kpi-item"><span class="currency">GQ</span><span class="value" id="cnt-gq">--</span></div>
-                        <div class="kpi-item"><span class="currency">CG</span><span class="value" id="cnt-cg">--</span></div>
-                        <div class="kpi-item"><span class="currency">VC</span><span class="value" id="cnt-vc">--</span></div>
+                        <div class="kpi-item">
+                            <span class="currency">GQ</span><span class="value" id="cnt-gq">--</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="currency">CG</span><span class="value" id="cnt-cg">--</span>
+                        </div>
+                        <div class="kpi-item">
+                            <span class="currency">VC</span><span class="value" id="cnt-vc">--</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,16 +150,35 @@
 
         <!-- Charts -->
         <section class="charts-section">
-            <div class="chart-container"><h3>Celulose</h3><div class="chart-wrapper"><canvas id="celuloseChart"></canvas></div></div>
-            <div class="chart-container"><h3>Dióxido de Titânio</h3><div class="chart-wrapper"><canvas id="tio2Chart"></canvas></div></div>
-            <div class="chart-container"><h3>Insumos para Resinas</h3><div class="chart-wrapper"><canvas id="insumosChart"></canvas></div></div>
-            <div class="chart-container"><h3>Resinas Prontas</h3><div class="chart-wrapper"><canvas id="resinasChart"></canvas></div></div>
-            <div class="chart-container"><h3>Moedas</h3><div class="chart-wrapper"><canvas id="moedasChart"></canvas></div></div>
-            <div class="chart-container"><h3>Frete Importação</h3><div class="chart-wrapper"><canvas id="freteImportChart"></canvas></div></div>
-            <div class="chart-container"><h3>Frete Exportação</h3><div class="chart-wrapper"><canvas id="freteExportChart"></canvas></div></div>
+            <div class="chart-container">
+                <h3>Celulose</h3>
+                <div class="chart-wrapper"><canvas id="celuloseChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Dióxido de Titânio</h3>
+                <div class="chart-wrapper"><canvas id="tio2Chart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Insumos para Resinas</h3>
+                <div class="chart-wrapper"><canvas id="insumosChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Resinas Prontas</h3>
+                <div class="chart-wrapper"><canvas id="resinasChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Moedas</h3>
+                <div class="chart-wrapper"><canvas id="moedasChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Frete Importação</h3>
+                <div class="chart-wrapper"><canvas id="freteImportChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <h3>Frete Exportação</h3>
+                <div class="chart-wrapper"><canvas id="freteExportChart"></canvas></div>
+            </div>
         </section>
     </div>
-
-    <script src="app.js"></script>
 </body>
 </html>
