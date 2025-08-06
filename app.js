@@ -4,6 +4,13 @@ let filteredData = [];
 let charts = {};
 
 // Função para mostrar o status do upload/carregamento
+function updateLastUploadInfo() {
+    const infoEl = document.getElementById('lastUploadInfo');
+    if (infoEl) {
+        const now = new Date();
+        infoEl.textContent = `Último upload: ${now.toLocaleDateString('pt-BR')} às ${now.toLocaleTimeString('pt-BR')}`;
+    }
+}
 function showUploadStatus(message, type) {
     const statusEl = document.getElementById('uploadStatus');
     if (statusEl) {
