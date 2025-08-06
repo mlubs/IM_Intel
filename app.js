@@ -145,7 +145,7 @@ function initializeApp() {
         return;
     }
     // Tenta carregar database.xlsx automaticamente da raiz
-    fetchAndLoadExcel('./database.xlsx');
+    fetchAndLoadExcel('database.xlsx');
 }
 
 // Setup dos event listeners do upload, filtros, etc.
