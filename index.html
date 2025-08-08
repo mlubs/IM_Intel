@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+    var senha = prompt("Digite a senha para acessar:");
+    if (senha !== "impress") {
+        alert("Senha incorreta. Você não pode acessar esta página.");
+        document.body.innerHTML = ""; // Esconde o conteúdo
+    }
+});
+</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Painel de Inteligência de Compras - Impress Decor</title>
